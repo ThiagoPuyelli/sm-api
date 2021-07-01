@@ -3,6 +3,6 @@ export default interface TurnInterface {
   lastname: string;
   email: string;
   phone: string;
-  description: string;
   date: Date;
+  description?: string;
 }

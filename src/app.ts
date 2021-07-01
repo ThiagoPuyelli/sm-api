@@ -10,6 +10,7 @@ import passportJwt from './passport/passport-jwt'
 // Routes
 import authRoutes from './routes/auth.routes'
 import patientRoutes from './routes/patient.routes'
+import turnRoutes from './routes/turn.routes'
 
 class App {
     public app: express.Application
@@ -60,6 +61,7 @@ class App {
     setRoutes () {
       this.app.use('/auth/', authRoutes)
       this.app.use('/patient/', patientRoutes)
+      this.app.use('/turn/', turnRoutes)
     }
 }
 

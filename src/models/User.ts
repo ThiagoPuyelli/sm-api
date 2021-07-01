@@ -68,7 +68,33 @@ const userSchema = new Schema<UserInterface & Document>({
     }],
     default: []
   },
-  schedule: []
+  schedule: {
+    type: [{
+      name: {
+        type: String,
+        required: true
+      },
+      lastname: {
+        type: String,
+        required: true
+      },
+      email: {
+        type: String,
+        required: true
+      },
+      phone: {
+        type: String,
+        required: true
+      },
+      date: {
+        type: Date,
+        required: true
+      },
+      description: String
+    }]
+  }
+}, {
+  versionKey: false
 })
 
 userSchema.pre('save', async function (next: NextFunction) {
