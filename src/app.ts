@@ -11,7 +11,6 @@ import passportJwt from './passport/passport-jwt'
 import authRoutes from './routes/auth.routes'
 
 class App {
-
     public app: express.Application
 
     constructor () {
@@ -42,7 +41,7 @@ class App {
           console.log('Error to database error:', err)
         }
       })
-    } 
+    }
 
     setMiddlewares () {
       this.app.use(morgan('dev'))

@@ -20,4 +20,3 @@ export default interface PatientInterface {
   province: string;
   documents: DocumentInterface[]
 }
-

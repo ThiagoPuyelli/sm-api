@@ -1,5 +1,5 @@
-import PatientInterface from "./PatientInterface";
-import TurnInterface from "./TurnInterface";
+import PatientInterface from './PatientInterface'
+import TurnInterface from './TurnInterface'
 
 export default interface UserInterface {
   email: string;

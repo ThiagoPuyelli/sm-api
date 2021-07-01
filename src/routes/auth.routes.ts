@@ -13,7 +13,7 @@ router.post('/sign-in', passport.authenticate('login'), (req, res) => {
     return sendResponse(res, 200, { token })
   } catch (err) {
     return sendResponse(res, 500, err.message || 'Server error')
-  } 
+  }
 })
 
 export default router
