@@ -4,6 +4,11 @@ import { config } from 'dotenv'
 import session from 'express-session'
 import morgan from 'morgan'
 import passport from 'passport'
+import passportBasic from './passport/passport-basic'
+import passportJwt from './passport/passport-jwt'
+
+// Routes
+import authRoutes from './routes/auth.routes'
 
 class App {
 
@@ -15,8 +20,11 @@ class App {
       this.app.set('port', process.env.PORT || 3500)
 
       config()
+      passportBasic()
+      passportJwt()
       this.connectDatabase()
       this.setMiddlewares()
+      this.setRoutes()
     }
 
     connectDatabase () {
@@ -47,6 +55,10 @@ class App {
       }))
       this.app.use(passport.initialize())
       this.app.use(passport.session())
+    }
+
+    setRoutes () {
+      this.app.use('/auth/', authRoutes)
     }
 }
 
