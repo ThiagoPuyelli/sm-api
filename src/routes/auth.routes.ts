@@ -7,7 +7,7 @@ const router = Router()
 router.post('/sign-in', passport.authenticate('login'), (req, res) => {
   try {
     const token = jwt.sign({ userID: req.user._id }, process.env.JWT_PASSWORD, {
-      expiresIn: 24 * 24 * 60
+      expiresIn: '1d'
     })
 
     return sendResponse(res, 200, { token })

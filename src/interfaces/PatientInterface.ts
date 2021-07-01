@@ -6,17 +6,16 @@ export interface DocumentInterface {
 
 export default interface PatientInterface {
   name: string;
-  lastname: string;
-  email: string;
-  birth: Date;
   DNI: string;
-  gender: string;
-  age: number;
-  phone: string;
-  mobile: string;
-  adress: string;
-  postalCode: string;
-  street: string;
-  province: string;
+  lastname: string;
+  email?: string;
+  birth?: Date;
+  gender?: string;
+  phone?: string;
+  mobile?: string;
+  adress?: string;
+  postalCode?: string;
+  street?: string;
+  province?: string;
   documents: DocumentInterface[]
 }
