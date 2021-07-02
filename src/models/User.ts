@@ -15,75 +15,14 @@ const userSchema = new Schema<UserInterface & Document>({
     minLength: 4
   },
   patients: {
-    type: [{
-      name: {
-        type: String,
-        required: true
-      },
-      lastname: {
-        type: String,
-        required: true
-      },
-      email: {
-        type: String,
-        required: false
-      },
-      birth: {
-        type: Date,
-        required: false
-      },
-      DNI: {
-        type: String,
-        required: true
-      },
-      gender: {
-        type: String,
-        required: false
-      },
-      phone: {
-        type: String,
-        required: false
-      },
-      mobile: {
-        type: String,
-        required: false
-      },
-      adress: {
-        type: String,
-        required: false
-      },
-      postalCode: {
-        type: String,
-        required: false
-      },
-      street: {
-        type: String,
-        required: false
-      },
-      province: {
-        type: String,
-        required: false
-      },
-      documents: []
-    }],
-    default: []
+    type: [Schema.Types.ObjectId],
+    ref: 'Patient'
   },
   schedule: {
     type: [{
-      name: {
-        type: String,
-        required: true
-      },
-      lastname: {
-        type: String,
-        required: true
-      },
-      email: {
-        type: String,
-        required: true
-      },
-      phone: {
-        type: String,
+      patient: {
+        type: Schema.Types.ObjectId,
+        ref: 'Patient',
         required: true
       },
       date: {

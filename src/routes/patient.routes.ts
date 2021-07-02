@@ -4,6 +4,7 @@ import { saveOrModifyPatient } from '../validators/patients'
 import validatorReq from '../middlewares/validatorReq'
 import sendResponse from '../utils/sendResponse'
 import User from '../models/User'
+import Patient from '../models/Patient'
 import pagination from '../utils/pagination'
 const router = Router()
 
@@ -15,7 +16,7 @@ router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, r
       page = '1'
     }
 
-    const { patients } = req.user
+    const { patients }: any = await Patient.populate(req.user, { path: 'patients' })
 
     if (!patients || patients.length === 0) {
       return sendResponse(res, 404, 'You don\'t have a patients')
@@ -41,10 +42,20 @@ router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, r
 
 router.get('/:id', passport.authenticate('token'), async (req, res) => {
   try {
-    const patient = req.user.patients.find(patient => String(patient._id) === String(req.params.id))
+    if (!req.user.patients || req.user.patients.length <= 0) {
+      return sendResponse(res, 404, 'You don\'t have patients')
+    }
+
+    const patientID = req.user.patients.find(patient => String(patient) === String(req.params.id))
+
+    if (!patientID) {
+      return sendResponse(res, 500, 'Your patient, doesn\'t exist')
+    }
+
+    const patient = await Patient.populate({ patientID }, { path: 'patientID' })
 
     if (!patient) {
-      return sendResponse(res, 500, 'Your patient, doesn\'t exist')
+      return sendResponse(res, 500, 'Error to find patient')
     }
 
     return sendResponse(res, 200, { patient })
@@ -67,15 +78,19 @@ router.post('/',
         req.user.patients = []
       }
 
-      req.user.patients.push({ ...req.body })
+      const newPatient = await Patient.create({ ...req.body, userID: req.user._id })
 
+      if (!newPatient) {
+        return sendResponse(res, 500, 'Error to save patient')
+      }
+      req.user.patients.push(newPatient._id)
       const { patients } = req.user
+
       const newUser = await User.findByIdAndUpdate(req.user._id, { patients })
 
       if (!newUser) {
-        return sendResponse(res, 500, 'Error to save patient')
+        return sendResponse(res, 500, 'Error to add patient in the user')
       }
-
       return sendResponse(res, 200, 'Patient added')
     } catch (err) {
       return sendResponse(res, 500, err.message || 'Server error')
@@ -88,7 +103,7 @@ router.put('/:id',
   validatorReq(saveOrModifyPatient(false)),
   async (req, res) => {
     try {
-      if (Object.keys(req.body)) {
+      if (Object.keys(req.body).length === 0) {
         return sendResponse(res, 404, 'Information invalid')
       }
       const { birth } = req.body
@@ -96,19 +111,21 @@ router.put('/:id',
         req.body.birth = new Date(birth)
       }
 
-      const patients = req.user.patients.map(patient => {
-        if (String(patient._id) === String(req.params.id)) {
-          for (const i in req.body) {
-            patient[i] = req.body[i]
-          }
-        }
+      const id = req.user.patients.find(patient => String(patient) === String(req.params.id))
 
-        return patient
-      })
+      if (!id) {
+        return sendResponse(res, 404, 'Your patient is doesn\'t exist')
+      }
+      const { patient }: any = await Patient.populate({ patient: id }, { path: 'patient' })
 
-      const newUser = await User.findByIdAndUpdate(req.user._id, { patients })
+      if (!patient) {
+        return sendResponse(res, 404, 'Your patient is invalid')
+      }
+      console.log(patient, { ...req.body })
 
-      if (!newUser) {
+      const newPatient = await Patient.findByIdAndUpdate(patient._id, { ...req.body })
+
+      if (!newPatient) {
         return sendResponse(res, 500, 'Error to update patient')
       }
 
@@ -123,7 +140,7 @@ router.delete('/:id', passport.authenticate('token'), async (req, res) => {
   try {
     let verify: boolean = false
     const patients = req.user.patients.filter(patient => {
-      if (String(patient._id) !== String(req.params.id)) {
+      if (String(patient) !== String(req.params.id)) {
         return patient
       } else {
         verify = true
@@ -133,6 +150,12 @@ router.delete('/:id', passport.authenticate('token'), async (req, res) => {
 
     if (!verify) {
       return sendResponse(res, 500, 'Patient doesn\'t exist')
+    }
+
+    const deletePatient = await Patient.findByIdAndRemove(req.params.id)
+
+    if (!deletePatient) {
+      return sendResponse(res, 500, 'Error to delete patient')
     }
 
     const newUser = await User.findByIdAndUpdate(req.user._id, { patients })

@@ -8,6 +8,7 @@ export default interface PatientInterface {
   name: string;
   DNI: string;
   lastname: string;
+  userID: string;
   email?: string;
   birth?: Date;
   gender?: string;

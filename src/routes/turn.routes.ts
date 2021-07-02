@@ -4,6 +4,7 @@ import validatorReq from '../middlewares/validatorReq'
 import passport from 'passport'
 import sendResponse from '../utils/sendResponse'
 import User from '../models/User'
+import Patient from '../models/Patient'
 import pagination from '../utils/pagination'
 const router = Router()
 
@@ -15,25 +16,29 @@ router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, r
       page = '1'
     }
 
-    const { schedule } = req.user
+    let { schedule } = req.user
+    let pages: number = 1
 
     if (!schedule || schedule.length === 0) {
       return sendResponse(res, 404, 'You don\'t have a turns')
     }
 
-    if (schedule.length <= parseInt(amount)) {
-      return sendResponse(res, 200, {
-        schedule,
-        numberPages: 1
-      })
-    } else {
-      const { data, pages } = pagination(schedule, parseInt(page), parseInt(amount))
-
-      return sendResponse(res, 200, {
-        schedule: data,
-        numberPages: pages
-      })
+    if (schedule.length >= parseInt(amount)) {
+      const info = pagination(schedule, parseInt(page), parseInt(amount))
+      schedule = info.data
+      pages = info.pages
     }
+
+    for (const i in schedule) {
+      schedule[i].description = undefined
+    }
+
+    await Patient.populate(schedule, { path: 'patient', select: 'name lastname DNI' })
+
+    return sendResponse(res, 200, {
+      schedule,
+      numberPages: pages
+    })
   } catch (err) {
     return sendResponse(res, 500, err.message || 'Server error')
   }
@@ -47,6 +52,8 @@ router.get('/:id', passport.authenticate('token'), async (req, res) => {
       return sendResponse(res, 500, 'Your turn, doesn\'t exist')
     }
 
+    await Patient.populate(turn, { path: 'patient', select: 'name lastname DNI' })
+
     return sendResponse(res, 200, { turn })
   } catch (err) {
     return sendResponse(res, 500, err.message || 'Server error')
@@ -58,7 +65,13 @@ router.post('/',
   validatorReq(saveAndModifyTurn(true)),
   async (req, res) => {
     try {
-      const { date } = req.body
+      const { date, patient } = req.body
+      const findPatient = await Patient.findById(patient)
+
+      if (!findPatient || String(findPatient.userID) !== String(req.user._id)) {
+        return sendResponse(res, 404, 'Your patient is doesn\'t exist')
+      }
+
       req.body.date = new Date(date)
 
       const { user } = req
@@ -87,7 +100,19 @@ router.put('/:id',
   validatorReq(saveAndModifyTurn(false)),
   async (req, res) => {
     try {
-      const { date } = req.body
+      const { date, patient } = req.body
+      if (patient) {
+        const findPatient = req.user.patients.find(pat => String(pat) === String(patient))
+        if (!findPatient) {
+          return sendResponse(res, 404, 'The patient doesn\'t exist')
+        }
+        const patientVerify = await Patient.populate({ patient: findPatient }, { path: 'findPatient' })
+
+        if (!patientVerify) {
+          return sendResponse(res, 500, 'The patient is invalid')
+        }
+      }
+
       if (date) {
         req.body.date = new Date(date)
       }
