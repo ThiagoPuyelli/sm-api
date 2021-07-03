@@ -11,7 +11,7 @@ export const saveOrModifyPatient = (required: boolean) => {
     gender: genValidator('string', false, undefined),
     phone: genValidator('string', false, undefined),
     mobile: genValidator('string', false, undefined),
-    adress: genValidator('string', false, undefined),
+    address: genValidator('string', false, undefined),
     postalCode: genValidator('string', false, undefined),
     street: genValidator('string', false, undefined),
     province: genValidator('string', false, undefined)

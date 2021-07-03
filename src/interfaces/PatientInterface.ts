@@ -14,7 +14,7 @@ export default interface PatientInterface {
   gender?: string;
   phone?: string;
   mobile?: string;
-  adress?: string;
+  address?: string;
   postalCode?: string;
   street?: string;
   province?: string;

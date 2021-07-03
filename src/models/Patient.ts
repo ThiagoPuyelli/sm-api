@@ -34,7 +34,7 @@ const patientSchema = new Schema<PatientInterface & Document>({
     type: String,
     required: false
   },
-  adress: {
+  address: {
     type: String,
     required: false
   },
