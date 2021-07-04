@@ -49,7 +49,7 @@ paths:
                     properties:
                       token:
                         type: string
-  /patient/find/:{amount}/:pageOptional:
+  /patient/find/:amount/:pageOptional:
     get:
       tags:
         - patients
@@ -87,6 +87,51 @@ paths:
                           $ref: '#/components/schemas/Patient'
                       numberPages:
                         type: number
+  /patient/:patientID:
+    get:
+      tags:
+        - patients
+      summary: Get Patient
+      description: This is a route for get one Patient
+      responses:
+        '401':
+          description: Unauthorized
+        '404':
+          description: If you don't have patients
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '500':
+          description: If have a error to find patient because server error or the patient don't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: 
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Patient
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: object
+                    properties:
+                      patient:
+                        $ref: '#/components/schemas/Patient'
   /patient:
     post:
       tags:
@@ -125,67 +170,288 @@ paths:
                     type: number
                   message:
                     type: string
-  /inventory:
-    get:
+  /patient/:patientId:
+    put:
       tags:
-        - developers
-      summary: searches inventory
-      operationId: searchInventory
-      description: |
-        By passing in the appropriate options, you can search for
-        available inventory in the system
+        - patients
+      summary: Update Patient
+      description: This is a route to update patient
       parameters:
-        - in: query
-          name: searchString
-          description: pass an optional search string for looking up inventory
+        - in: body
+          name: Data Patient
+          description: The _id is not send in the body, and all the data is optional.
           required: false
           schema:
-            type: string
-        - in: query
-          name: skip
-          description: number of records to skip for pagination
-          schema:
-            type: integer
-            format: int32
-            minimum: 0
-        - in: query
-          name: limit
-          description: maximum number of records to return
-          schema:
-            type: integer
-            format: int32
-            minimum: 0
-            maximum: 50
+            $ref: '#/components/schemas/Patient'
       responses:
-        '200':
-          description: search results matching criteria
+        '404':
+          description: If you don't send body with data, or data is invalid, or patient doesn't exist
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/InventoryItem'
-        '400':
-          description: bad input parameter
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '500':
+          description: If have error to update patient
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Update Patient
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+  /patient/:patient_id:
+    delete:
+      tags:
+        - patients
+      summary: Delete Patient
+      description: This is a route for delete Patient
+      responses:
+        '401':
+          description: Unauthorized
+        '500':
+          description: Error to delete patient
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Patient deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+  /turn/find/:amount/:pageOptional:
+    get:
+      tags:
+        - schedule
+      summary: Get Turns
+      description: This is a route for get Turns in schedule
+      responses:
+        '401':
+          description: Unauthorized
+        '404':
+          description: If you don't have turns
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '500':
+          description: If the server have error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Get Turns
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: object
+                    properties:
+                      schedule:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Turn'
+                      numberPages:
+                        type: number
+  /turn/:turnID:
+    get:
+      tags:
+        - schedule
+      summary: Get Turn
+      description: This is a route to get a one Turn with id
+      responses:
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error, or your turn doesn't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Get Turn
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: object
+                    properties:
+                      turn:
+                        $ref: '#/components/schemas/Turn'
+    put:
+      tags:
+        - schedule
+      summary: Update Turn
+      description: This is a route for update turn
+      parameters:
+        - in: body
+          name: Data Turn
+          description: The _id is not send and the other data is optional
+          required: true
+          schema:
+            $ref: '#/components/schemas/Turn'
+      responses:
+        '401':
+          description: Unauthorized
+        '404':
+          description: If the information is invalid or turn doesn't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Turn updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+    delete:
+      tags:
+        - schedule
+      summary: Delete Turn
+      description: This is a route to delete Turn with id
+      responses:
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error, or your turn doesn't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Delete Turn
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: object
+                    properties:
+                      turn:
+                        $ref: '#/components/schemas/Turn'
+  /turn:
     post:
       tags:
-        - admins
-      summary: adds an inventory item
-      operationId: addInventory
-      description: Adds an item to the system
+        - schedule
+      summary: Save Turn
+      description: This is a route to user add a turn in schedule
+      parameters:
+        - in: body
+          name: Data Turn
+          description: The _id is not send and the description is optional
+          required: true
+          schema:
+            $ref: '#/components/schemas/Turn'
       responses:
-        '201':
-          description: item created
-        '400':
-          description: 'invalid input, object invalid'
-        '409':
-          description: an existing item already exists
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InventoryItem'
-        description: Inventory item to add
+        '500':
+          description: When data is invalid or have error to save turn
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '404':
+          description: If the patient doesn't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '200':
+          description: When turn is saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
 components:
   schemas:
     User:
@@ -203,6 +469,15 @@ components:
           format: email
         password:
           type: string
+        patients:
+          type: array
+          items:
+            type: string
+            format: mongo
+        schedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/Turn'
     Patient:
       type: object
       required:
@@ -242,39 +517,21 @@ components:
           type: string
         province: 
           type: string
-    InventoryItem:
+    Turn:
       type: object
       required:
-        - id
-        - name
-        - manufacturer
-        - releaseDate
+        - _id
+        - patient
+        - date
       properties:
-        id:
+        _id:
           type: string
-          format: uuid
-          example: d290f1ee-6c54-4b01-90e6-d701748f0851
-        name:
+          format: mongo
+        patient:
           type: string
-          example: Widget Adapter
-        releaseDate:
+          format: mongo
+        date:
           type: string
-          format: date-time
-          example: '2016-08-29T09:12:33.001Z'
-        manufacturer:
-          $ref: '#/components/schemas/Manufacturer'
-    Manufacturer:
-      required:
-        - name
-      properties:
-        name:
+          format: date
+        description:
           type: string
-          example: ACME Corporation
-        homePage:
-          type: string
-          format: url
-          example: 'https://www.acme-corp.com'
-        phone:
-          type: string
-          example: 408-867-5309
-      type: object
