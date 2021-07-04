@@ -6,6 +6,7 @@ import morgan from 'morgan'
 import passport from 'passport'
 import passportBasic from './passport/passport-basic'
 import passportJwt from './passport/passport-jwt'
+import cors from 'cors'
 
 // Routes
 import authRoutes from './routes/auth.routes'
@@ -23,6 +24,7 @@ class App {
       config()
       passportBasic()
       passportJwt()
+      this.setCors()
       this.connectDatabase()
       this.setMiddlewares()
       this.setRoutes()
@@ -62,6 +64,26 @@ class App {
       this.app.use('/auth/', authRoutes)
       this.app.use('/patient/', patientRoutes)
       this.app.use('/turn/', turnRoutes)
+    }
+
+    setCors () {
+      this.app.use((req, res, next) => {
+        res.header('Access-Control-Allow-Origin', 'http://qfqfeqef.com')
+        res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method, x-access-token')
+        res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+        res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE')
+        next()
+      })
+      /* this.app.use(cors({
+        origin: function (origin, callback) {
+          console.log(origin)
+          if (origin === 'http://localhost:3500') {
+            return callback(null, true)
+          } else {
+            return callback(new Error('Not allowed by CORS'))
+          }
+        }
+      })) */
     }
 }
 
