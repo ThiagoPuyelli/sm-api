@@ -55,7 +55,22 @@ const patientSchema = new Schema<PatientInterface & Document>({
     ref: 'User',
     required: true
   },
-  documents: []
+  documents: {
+    type: [{
+      name: {
+        type: String,
+        required: true
+      },
+      date: {
+        type: Date,
+        default: new Date()
+      },
+      link: {
+        type: String,
+        required: true
+      }
+    }]
+  }
 })
 
 export default model<PatientInterface & Document>('Patient', patientSchema)

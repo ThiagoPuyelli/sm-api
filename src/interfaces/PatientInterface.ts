@@ -1,7 +1,7 @@
 export interface DocumentInterface {
-    name: string;
-    link: string;
-    date: Date;
+  name: string;
+  link: string;
+  date: Date;
 }
 
 export default interface PatientInterface {
