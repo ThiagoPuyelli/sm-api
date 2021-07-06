@@ -4,6 +4,11 @@ export interface DocumentInterface {
   date: Date;
 }
 
+export interface FisicExploration {
+  title: string;
+  data: string;
+}
+
 export default interface PatientInterface {
   name: string;
   DNI: string;
@@ -18,5 +23,6 @@ export default interface PatientInterface {
   postalCode?: string;
   street?: string;
   province?: string;
-  documents: DocumentInterface[]
+  documents: DocumentInterface[];
+  fisicExploration: FisicExploration[];
 }

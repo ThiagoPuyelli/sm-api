@@ -70,6 +70,23 @@ const patientSchema = new Schema<PatientInterface & Document>({
         required: true
       }
     }]
+  },
+  fisicExploration: {
+    type: [{
+      title: {
+        type: String,
+        required: true,
+        maxLength: 40,
+        unique: true
+      },
+      data: {
+        type: String,
+        required: true,
+        maxLength: 400
+      },
+      _id: false
+    }],
+    default: {}
   }
 })
 
