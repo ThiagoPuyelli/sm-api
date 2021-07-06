@@ -41,6 +41,51 @@ router.get('/find/:id/:amount/:page?',
     }
   })
 
+router.get('/type/:id/:type/:amount/:page?',
+  passport.authenticate('token'),
+  findPatient('id'),
+  async (req, res) => {
+    try {
+      let { documents } = req.patient
+      let { amount, page, type } = req.params
+      const types = type.split('-')
+      if (!page) {
+        page = '1'
+      }
+      page = parseInt(page)
+      amount = parseInt(amount)
+
+      documents = documents.filter(doc => {
+        for (const i in types) {
+          if (String(types[i]) === String(doc.type)) {
+            return doc
+          }
+        }
+
+        return false
+      })
+
+      if (!documents || documents.length <= 0) {
+        return sendResponse(res, 404, 'You don\'t have documents with type')
+      }
+
+      if (amount < documents.length) {
+        const { data, pages } = pagination(documents, page, amount)
+        return sendResponse(res, 200, {
+          documents: data,
+          numberPages: pages
+        })
+      } else {
+        return sendResponse(res, 200, {
+          documents,
+          numberPages: 1
+        })
+      }
+    } catch (err) {
+      return sendResponse(res, 500, err.message || 'Server error')
+    }
+  })
+
 router.get('/:patientID/:documentID',
   passport.authenticate('token'),
   findPatient('patientID'),
@@ -58,6 +103,26 @@ router.get('/:patientID/:documentID',
       }
 
       return sendResponse(res, 200, { document })
+    } catch (err) {
+      return sendResponse(res, 500, err.message || 'Server error')
+    }
+  })
+
+router.get('/get/types/:id',
+  passport.authenticate('token'),
+  findPatient('id'),
+  async (req, res) => {
+    try {
+      const { documents } = req.patient
+
+      const types = {}
+      for (const i in documents) {
+        if (!types[documents[i].type]) {
+          types[documents[i].type] = 'pepe'
+        }
+      }
+
+      return sendResponse(res, 200, { types: Object.keys(types) })
     } catch (err) {
       return sendResponse(res, 500, err.message || 'Server error')
     }

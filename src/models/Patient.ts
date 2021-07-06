@@ -80,6 +80,11 @@ const patientSchema = new Schema<PatientInterface & Document>({
       link: {
         type: String,
         required: true
+      },
+      type: {
+        type: String,
+        required: true,
+        maxLength: 30
       }
     }]
   },
