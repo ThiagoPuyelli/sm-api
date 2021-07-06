@@ -6,6 +6,7 @@ import morgan from 'morgan'
 import passport from 'passport'
 import passportBasic from './passport/passport-basic'
 import passportJwt from './passport/passport-jwt'
+import cors from 'cors'
 
 // Routes
 import authRoutes from './routes/auth.routes'
@@ -25,9 +26,16 @@ class App {
       config()
       passportBasic()
       passportJwt()
+      this.setCors()
       this.connectDatabase()
       this.setMiddlewares()
       this.setRoutes()
+    }
+
+    setCors () {
+      this.app.use(cors({
+        origin: 'http://localhost:3000'
+      }))
     }
 
     connectDatabase () {

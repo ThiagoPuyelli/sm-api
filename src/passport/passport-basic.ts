@@ -18,20 +18,20 @@ export default () => {
         let user: any = await User.findOne({ email })
 
         if (!user) {
-          done(false)
+          return done(false)
         }
 
         const verifyPassword = await user.comparePasswords(password)
 
         if (!verifyPassword) {
-          done(false)
+          return done(false)
         }
 
         if (user.toObject) {
           user = user.toObject()
         }
 
-        done(null, user)
+        return done(null, user)
       } catch (err) {
         return done(false)
       }
