@@ -19,7 +19,7 @@ export default (type: string, required: boolean, minmax: MinMax|undefined) => {
     }
 
     if (max) {
-      validator = validator.max(min)
+      validator = validator.max(max)
     }
   }
 

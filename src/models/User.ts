@@ -29,7 +29,11 @@ const userSchema = new Schema<UserInterface & Document>({
         type: Date,
         required: true
       },
-      description: String
+      description: {
+        type: String,
+        required: false,
+        maxLength: 400
+      }
     }]
   }
 }, {
