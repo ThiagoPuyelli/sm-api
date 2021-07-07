@@ -4,6 +4,14 @@ import bcrypt from 'bcryptjs'
 import { NextFunction } from 'express'
 
 const userSchema = new Schema<UserInterface & Document>({
+  name: {
+    type: String,
+    required: true
+  },
+  lastname: {
+    type: String,
+    required: true
+  },
   email: {
     type: String,
     required: true,
