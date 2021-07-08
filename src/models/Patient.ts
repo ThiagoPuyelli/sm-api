@@ -105,6 +105,8 @@ const patientSchema = new Schema<PatientInterface & Document>({
     }],
     default: []
   }
+}, {
+  versionKey: false
 })
 
 export default model<PatientInterface & Document>('Patient', patientSchema)
