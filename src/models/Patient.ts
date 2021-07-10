@@ -93,8 +93,7 @@ const patientSchema = new Schema<PatientInterface & Document>({
       title: {
         type: String,
         required: true,
-        maxLength: 40,
-        unique: true
+        maxLength: 40
       },
       data: {
         type: String,
