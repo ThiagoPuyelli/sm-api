@@ -19,7 +19,10 @@ router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, r
     const { patients }: any = await Patient.populate(req.user, { path: 'patients' })
 
     if (!patients || patients.length === 0) {
-      return sendResponse(res, 404, 'You don\'t have a patients')
+      return sendResponse(res, 200, {
+        patients: [],
+        numberPages: 0
+      })
     }
 
     if (patients.length <= parseInt(amount)) {

@@ -20,7 +20,10 @@ router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, r
     let pages: number = 1
 
     if (!schedule || schedule.length === 0) {
-      return sendResponse(res, 404, 'You don\'t have a turns')
+      return sendResponse(res, 200, {
+        schedule: [],
+        numberPages: 0
+      })
     }
 
     if (schedule.length >= parseInt(amount)) {

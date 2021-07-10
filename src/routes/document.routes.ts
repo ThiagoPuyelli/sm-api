@@ -15,7 +15,10 @@ router.get('/find/:id/:amount/:page?',
       const { documents } = req.patient
 
       if (!documents || documents.length === 0) {
-        return sendResponse(res, 404, 'The patient don\'t have documents')
+        return sendResponse(res, 200, {
+          documents: [],
+          numberPages: 0
+        })
       }
       let { page, amount } = req.params
 
@@ -66,7 +69,10 @@ router.get('/type/:id/:type/:amount/:page?',
       })
 
       if (!documents || documents.length <= 0) {
-        return sendResponse(res, 404, 'You don\'t have documents with type')
+        return sendResponse(res, 200, {
+          documents: [],
+          numberPages: 0
+        })
       }
 
       if (amount < documents.length) {
