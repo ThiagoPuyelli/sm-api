@@ -69,7 +69,9 @@ router.post('/:id',
         return sendResponse(res, 500, 'Error to save data in the fisic exploration')
       }
 
-      return sendResponse(res, 200, 'Data saved')
+      const { fisicExploration } = patient
+
+      return sendResponse(res, 200, { fisicExploration })
     } catch (err) {
       return sendResponse(res, 500, err.message || 'Server error')
     }
@@ -93,7 +95,7 @@ router.put('/:id/:fisic',
         return sendResponse(res, 500, 'Error to update fisic exploration')
       }
 
-      return sendResponse(res, 200, 'Fisic exploration updated')
+      return sendResponse(res, 200, { fisicExploration })
     } catch (err) {
       return sendResponse(res, 500, err.message || 'Server error')
     }

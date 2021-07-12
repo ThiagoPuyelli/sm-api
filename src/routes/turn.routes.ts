@@ -91,7 +91,7 @@ router.post('/',
         return sendResponse(res, 500, 'Error to save new turn')
       }
 
-      return sendResponse(res, 200, 'Turn saved')
+      return sendResponse(res, 200, { turn: { ...req.body } })
     } catch (err) {
       return sendResponse(res, 500, err.message || 'Server error')
     }
@@ -121,10 +121,12 @@ router.put('/:id',
       }
 
       let verify: boolean = false
+      let turnModify
       const schedule = req.user.schedule.map(turn => {
         if (String(turn._id) === String(req.params.id)) {
           for (const i in req.body) {
             turn[i] = req.body[i]
+            turnModify = turn
           }
           verify = true
           return turn
@@ -133,7 +135,7 @@ router.put('/:id',
         }
       })
 
-      if (!verify) {
+      if (!verify && !turnModify) {
         return sendResponse(res, 404, 'The turn doesn\'t exist')
       }
 
@@ -143,7 +145,7 @@ router.put('/:id',
         return sendResponse(res, 500, 'Error to update turn')
       }
 
-      return sendResponse(res, 200, 'Turn updated')
+      return sendResponse(res, 200, { turn: turnModify })
     } catch (err) {
       return sendResponse(res, 500, err.message || 'Server error')
     }

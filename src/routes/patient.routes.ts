@@ -94,7 +94,7 @@ router.post('/',
       if (!newUser) {
         return sendResponse(res, 500, 'Error to add patient in the user')
       }
-      return sendResponse(res, 200, 'Patient added')
+      return sendResponse(res, 200, { patient: newPatient })
     } catch (err) {
       return sendResponse(res, 500, err.message || 'Server error')
     }
@@ -126,13 +126,13 @@ router.put('/:id',
       }
       console.log(patient, { ...req.body })
 
-      const newPatient = await Patient.findByIdAndUpdate(patient._id, { ...req.body })
+      const newPatient = await Patient.findByIdAndUpdate(patient._id, { ...req.body }, { new: true })
 
       if (!newPatient) {
         return sendResponse(res, 500, 'Error to update patient')
       }
 
-      return sendResponse(res, 200, 'Patient updated')
+      return sendResponse(res, 200, { patient: newPatient })
     } catch (err) {
       return sendResponse(res, 500, err.message || 'Server error')
     }
@@ -141,24 +141,42 @@ router.put('/:id',
 
 router.delete('/:id', passport.authenticate('token'), async (req, res) => {
   try {
-    let verify: boolean = false
-    const patients = req.user.patients.filter(patient => {
-      if (String(patient) !== String(req.params.id)) {
+    const { id } = req.params
+    if (id === 'all') {
+      const deletePatients = await Patient.remove()
+
+      if (!deletePatients) {
+        return sendResponse(res, 500, 'Error to delete patients')
+      }
+
+      let { patients } = req.user
+      patients = []
+      const newUser = await User.findByIdAndUpdate(req.user._id, { patients })
+
+      if (!newUser) {
+        return sendResponse(res, 500, 'Error to save delete patients')
+      }
+
+      return sendResponse(res, 200, 'Patients deleted')
+    }
+
+    let verify: number = 0
+    const ids = id.split('-')
+    const patients = req.user.patients.filter(async (patient) => {
+      const verifyID = ids.find(i => String(i) === String(patient))
+      if (!verifyID) {
         return patient
       } else {
-        verify = true
+        verify += 1
+        await Patient.findByIdAndRemove(verifyID)
         return false
       }
     })
+    console.log(patients)
 
-    if (!verify) {
-      return sendResponse(res, 500, 'Patient doesn\'t exist')
-    }
-
-    const deletePatient = await Patient.findByIdAndRemove(req.params.id)
-
-    if (!deletePatient) {
-      return sendResponse(res, 500, 'Error to delete patient')
+    console.log(verify)
+    if (!verify || ids.length > verify) {
+      return sendResponse(res, 500, (ids.length - verify) + ' patients doesn\'t exist')
     }
 
     const newUser = await User.findByIdAndUpdate(req.user._id, { patients })
@@ -167,7 +185,7 @@ router.delete('/:id', passport.authenticate('token'), async (req, res) => {
       return sendResponse(res, 500, 'Error to delete patient')
     }
 
-    return sendResponse(res, 200, 'Patient deleted')
+    return sendResponse(res, 200, 'Patients deleteded')
   } catch (err) {
     return sendResponse(res, 500, err.message || 'Server error')
   }
