@@ -5,6 +5,7 @@ import sendResponse from '../utils/sendResponse'
 import { saveAndModifyDocument } from '../validators/documents'
 import findPatient from '../middlewares/findPatient'
 import pagination from '../utils/pagination'
+import deleteEntities from '../utils/deleteEntities'
 const router = Router()
 
 router.get('/find/:id/:amount/:page?',
@@ -209,30 +210,39 @@ router.delete('/:patientID/:documentID',
         return sendResponse(res, 500, 'Your patient don\'t have documents')
       }
 
-      let verify: boolean = false
+      const { documentID } = req.params
 
-      documents = documents.filter(document => {
-        if (String(document._id) === String(req.params.documentID)) {
-          verify = true
-          return false
-        } else {
-          return true
+      if (documentID === 'all') {
+        documents = []
+
+        const newPatient = await patient.save()
+
+        if (!newPatient) {
+          return sendResponse(res, 500, 'Error to delete all documents')
         }
-      })
 
-      if (!verify) {
-        return sendResponse(res, 404, 'The document doesn\'t exist')
+        return sendResponse(res, 200, { documents })
       }
 
-      patient.documents = documents
+      const data = await deleteEntities(res, documentID, documents, undefined, '_id')
 
-      const newPatient = await patient.save()
+      if (data) {
+        const { objects, verify, ids } = data
 
-      if (!newPatient) {
-        return sendResponse(res, 500, 'Error to delete document')
+        patient.documents = objects
+
+        const newPatient = await patient.save()
+
+        if (!newPatient) {
+          return sendResponse(res, 500, 'Error to delete document')
+        }
+
+        if (verify < ids.length) {
+          return sendResponse(res, 404, (ids.length - verify) + ' document doesn\'t exist')
+        }
+
+        return sendResponse(res, 200, { documents: patient.documents })
       }
-
-      return sendResponse(res, 200, 'Document removed')
     } catch (err) {
       return sendResponse(res, 500, err.message || 'Server error')
     }

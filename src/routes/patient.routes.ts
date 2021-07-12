@@ -6,6 +6,7 @@ import sendResponse from '../utils/sendResponse'
 import User from '../models/User'
 import Patient from '../models/Patient'
 import pagination from '../utils/pagination'
+import deleteEntities from '../utils/deleteEntities'
 const router = Router()
 
 router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, res) => {
@@ -157,35 +158,29 @@ router.delete('/:id', passport.authenticate('token'), async (req, res) => {
         return sendResponse(res, 500, 'Error to save delete patients')
       }
 
-      return sendResponse(res, 200, 'Patients deleted')
+      return sendResponse(res, 200, { patients })
     }
 
-    let verify: number = 0
-    const ids = id.split('-')
-    const patients = req.user.patients.filter(async (patient) => {
-      const verifyID = ids.find(i => String(i) === String(patient))
-      if (!verifyID) {
-        return patient
-      } else {
-        verify += 1
-        await Patient.findByIdAndRemove(verifyID)
-        return false
+    const data = await deleteEntities(res, id, req.user.patients, Patient, undefined)
+
+    if (data) {
+      const { objects, verify, ids } = data
+
+      const newUser = await User.findByIdAndUpdate(req.user._id, { patients: objects })
+
+      if (!newUser) {
+        return sendResponse(res, 500, 'Error to delete patients')
       }
-    })
-    console.log(patients)
 
-    console.log(verify)
-    if (!verify || ids.length > verify) {
-      return sendResponse(res, 500, (ids.length - verify) + ' patients doesn\'t exist')
+      if (ids.length > verify) {
+        return sendResponse(res, 500, {
+          error: (ids.length - verify) + ' patients doesn\'t exist',
+          patients: newUser.patients
+        })
+      }
+
+      return sendResponse(res, 200, { patients: newUser.patients })
     }
-
-    const newUser = await User.findByIdAndUpdate(req.user._id, { patients })
-
-    if (!newUser) {
-      return sendResponse(res, 500, 'Error to delete patient')
-    }
-
-    return sendResponse(res, 200, 'Patients deleteded')
   } catch (err) {
     return sendResponse(res, 500, err.message || 'Server error')
   }

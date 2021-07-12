@@ -6,6 +6,7 @@ import sendResponse from '../utils/sendResponse'
 import User from '../models/User'
 import Patient from '../models/Patient'
 import pagination from '../utils/pagination'
+import deleteEntities from '../utils/deleteEntities'
 const router = Router()
 
 router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, res) => {
@@ -154,27 +155,55 @@ router.put('/:id',
 
 router.delete('/:id', passport.authenticate('token'), async (req, res) => {
   try {
-    let verify: boolean = false
-    const schedule = req.user.schedule.filter(turn => {
-      if (String(turn._id) !== String(req.params.id)) {
+    const { id } = req.params
+    let { schedule } = req.user
+
+    if (id === 'all') {
+      schedule = []
+
+      const newUser = await User.findByIdAndUpdate(req.user._id, { schedule })
+
+      if (!newUser) {
+        return sendResponse(res, 500, 'Error to delete any turns')
+      }
+
+      return sendResponse(res, 200, { schedule })
+    }
+    /* const ids = id.split('-')
+    let verify: number = 0
+
+    schedule = schedule.filter(turn => {
+      const verifyID = ids.find(i => i === String(turn._id))
+      if (!verifyID) {
         return turn
       } else {
-        verify = true
+        verify += 1
         return false
       }
     })
 
-    if (!verify) {
-      return sendResponse(res, 500, 'Turn doesn\'t exist')
+    if (verify === 0) {
+      return sendResponse(res, 404, 'Nothing exists')
+    } */
+
+    const data = await deleteEntities(res, id, schedule, undefined, '_id')
+
+    if (data) {
+      const { objects, verify, ids } = data
+      schedule = objects
+
+      const newUser = await User.findByIdAndUpdate(req.user._id, { schedule })
+
+      if (!newUser) {
+        return sendResponse(res, 500, 'Error to delete turn')
+      }
+
+      if (verify < ids.length) {
+        return sendResponse(res, 200, (ids.length - verify) + ' turns doesn\'t exist')
+      }
+
+      return sendResponse(res, 200, { schedule })
     }
-
-    const newUser = await User.findByIdAndUpdate(req.user._id, { schedule })
-
-    if (!newUser) {
-      return sendResponse(res, 500, 'Error to delete turn')
-    }
-
-    return sendResponse(res, 200, 'Turn deleted')
   } catch (err) {
     return sendResponse(res, 500, err.message || 'Server error')
   }
