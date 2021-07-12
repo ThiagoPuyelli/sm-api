@@ -48,7 +48,7 @@ const patientSchema = new Schema<PatientInterface & Document>({
   postalCode: {
     type: String,
     required: false,
-    maxLength: 5
+    maxLength: 8
   },
   street: {
     type: String,

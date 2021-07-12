@@ -12,7 +12,7 @@ export const saveOrModifyPatient = (required: boolean) => {
     phone: genValidator('string', false, { max: 25 }),
     mobile: genValidator('string', false, { max: 25 }),
     address: genValidator('string', false, { max: 25 }),
-    postalCode: genValidator('string', false, { max: 5 }),
+    postalCode: genValidator('string', false, { max: 8 }),
     street: genValidator('string', false, { max: 20 }),
     province: genValidator('string', false, { max: 25 }),
     image: genValidator('string', false, undefined)
