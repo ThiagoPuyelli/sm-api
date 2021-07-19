@@ -56,8 +56,6 @@ router.get('/type/:id/:type/:amount/:page?',
       if (!page) {
         page = '1'
       }
-      page = parseInt(page)
-      amount = parseInt(amount)
 
       documents = documents.filter(doc => {
         for (const i in types) {
@@ -76,8 +74,8 @@ router.get('/type/:id/:type/:amount/:page?',
         })
       }
 
-      if (amount < documents.length) {
-        const { data, pages } = pagination(documents, page, amount)
+      if (parseInt(amount) < documents.length) {
+        const { data, pages } = pagination(documents, parseInt(page), parseInt(amount))
         return sendResponse(res, 200, {
           documents: data,
           numberPages: pages

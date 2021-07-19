@@ -7,6 +7,7 @@ import passport from 'passport'
 import passportBasic from './passport/passport-basic'
 import passportJwt from './passport/passport-jwt'
 import cors from 'cors'
+import fileUpload from 'express-fileupload'
 
 // Routes
 import authRoutes from './routes/auth.routes'
@@ -59,6 +60,10 @@ class App {
       this.app.use(morgan('dev'))
       this.app.use(express.urlencoded({ extended: false }))
       this.app.use(express.json())
+      this.app.use(fileUpload({
+        useTempFiles: true,
+        tempFileDir: __dirname + './uploads'
+      }))
       this.app.use(session({
         secret: process.env.SECRET_SESSION,
         resave: false,

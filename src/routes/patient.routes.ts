@@ -7,6 +7,8 @@ import User from '../models/User'
 import Patient from '../models/Patient'
 import pagination from '../utils/pagination'
 import deleteEntities from '../utils/deleteEntities'
+import fireConfig from '../utils/fireConfig'
+import path from 'path'
 const router = Router()
 
 router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, res) => {
@@ -80,6 +82,23 @@ router.post('/',
 
       if (!req.user.patients) {
         req.user.patients = []
+      }
+
+      if (req.files) {
+        const { image } = req.files
+        const uploadPath = path.join(__dirname, '/../uploads/' + image.name)
+        await image.mv(uploadPath, (err) => {
+          if (err) {
+            return sendResponse(res, 500, 'Image invalid')
+          }
+        })
+
+        const storage = fireConfig().storage()
+        console.log(storage)
+        const imageUpload = await storage.bucket('patients').upload(path.join(__dirname, '/../uploads/' + image.name))
+        if (!imageUpload) {
+          return sendResponse(res, 500, 'Error to submit image')
+        }
       }
 
       const newPatient = await Patient.create({ ...req.body, userID: req.user._id })
