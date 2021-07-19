@@ -23,7 +23,8 @@
     "mongoose": "^5.13.0",
     "passport": "^0.4.1",
     "passport-http": "^0.3.0",
-    "passport-jwt": "^4.0.0"
+    "passport-jwt": "^4.0.0",
+    "randomstring": "^1.2.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.28.1",

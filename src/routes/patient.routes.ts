@@ -7,8 +7,8 @@ import User from '../models/User'
 import Patient from '../models/Patient'
 import pagination from '../utils/pagination'
 import deleteEntities from '../utils/deleteEntities'
-import fireConfig from '../utils/fireConfig'
-import path from 'path'
+import firebase from 'firebase-admin'
+import saveImage from '../utils/saveImage'
 const router = Router()
 
 router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, res) => {
@@ -73,6 +73,7 @@ router.get('/:id', passport.authenticate('token'), async (req, res) => {
 router.post('/',
   passport.authenticate('token'),
   validatorReq(saveOrModifyPatient(true)),
+  saveImage,
   async (req, res) => {
     try {
       const { birth } = req.body
@@ -85,20 +86,9 @@ router.post('/',
       }
 
       if (req.files) {
-        const { image } = req.files
-        const uploadPath = path.join(__dirname, '/../uploads/' + image.name)
-        await image.mv(uploadPath, (err) => {
-          if (err) {
-            return sendResponse(res, 500, 'Image invalid')
-          }
-        })
-
-        const storage = fireConfig().storage()
-        console.log(storage)
-        const imageUpload = await storage.bucket('patients').upload(path.join(__dirname, '/../uploads/' + image.name))
-        if (!imageUpload) {
-          return sendResponse(res, 500, 'Error to submit image')
-        }
+        const storage = firebase.storage()
+        const { uploadPath } = req.body
+        await storage.bucket('patients').upload(uploadPath)
       }
 
       const newPatient = await Patient.create({ ...req.body, userID: req.user._id })
