@@ -4,11 +4,12 @@ import path from 'path'
 
 export default async (req, res, next) => {
   try {
-    if (req.files.image) {
+    if (req.files && req.files.image) {
       const { image } = req.files
       const fileNameSplit = image.name.split('.')
       const fileExt = fileNameSplit[fileNameSplit.length - 1]
-      const uploadPath = path.join(__dirname, '/../uploads/' + randomstring.generate(10) + '.' + fileExt)
+      const fileName = randomstring.generate(10) + '.' + fileExt
+      const uploadPath = path.join(__dirname, '/../uploads/' + fileName)
 
       await image.mv(uploadPath, (err) => {
         if (err) {
@@ -17,9 +18,10 @@ export default async (req, res, next) => {
       })
 
       req.body.uploadPath = uploadPath
+      req.body.fileName = fileName
       next()
     } else {
-      return sendResponse(res, 500, 'Image invalid')
+      next()
     }
   } catch (err) {
     return sendResponse(res, 500, err.message || 'Server error')

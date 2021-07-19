@@ -1,15 +1,12 @@
-import firebase from 'firebase-admin'
+import admin from 'firebase-admin'
+
+const serviceAccount = require('../../sm-app-1a1ee-firebase-adminsdk-pu4f3-24cdcc79e1.json')
 
 export default () => {
   const fireConfig = {
-    apiKey: 'AIzaSyD1cQnbeZSZxobRyWh8er6ScgwhrFM3ghc',
-    authDomain: 'sm-app-1a1ee.firebaseapp.com',
-    projectId: 'sm-app-1a1ee',
-    storageBucket: 'gs://sm-app-1a1ee.appspot.com/',
-    messagingSenderId: '214829409214',
-    appId: '1:214829409214:web:a1ef61aa705c4332a98fef',
-    measurementId: 'G-NX1PY56T2B'
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: 'sm-app-1a1ee.appspot.com'
   }
 
-  return firebase.initializeApp(fireConfig)
+  return admin.initializeApp(fireConfig)
 }
