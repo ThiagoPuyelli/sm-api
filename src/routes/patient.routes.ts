@@ -188,7 +188,7 @@ router.delete('/:id', passport.authenticate('token'), async (req, res) => {
         })
       }
 
-      return sendResponse(res, 200, { patients: newUser.patients })
+      return sendResponse(res, 200, 'Patients removed')
     }
   } catch (err) {
     return sendResponse(res, 500, err.message || 'Server error')
