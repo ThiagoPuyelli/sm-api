@@ -9,6 +9,7 @@ import pagination from '../utils/pagination'
 import deleteEntities from '../utils/deleteEntities'
 import firebase from 'firebase-admin'
 import saveImage from '../utils/saveImage'
+import fs from 'fs'
 const router = Router()
 
 router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, res) => {
@@ -85,10 +86,18 @@ router.post('/',
         req.user.patients = []
       }
 
-      if (req.files) {
+      if (req.files && req.files.image) {
         const storage = firebase.storage()
-        const { uploadPath } = req.body
-        await storage.bucket('patients').upload(uploadPath)
+        const { uploadPath, fileName } = req.body
+        const imageSend = await storage.bucket().upload(uploadPath, {
+          destination: 'patients/' + fileName
+        })
+
+        if (!imageSend) {
+          return sendResponse(res, 500, 'Error to send image')
+        }
+        req.body.image = 'gs://sm-app-1a1ee.appspot.com/patients/' + fileName
+        await fs.unlinkSync(uploadPath)
       }
 
       const newPatient = await Patient.create({ ...req.body, userID: req.user._id })
