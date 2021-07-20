@@ -7,7 +7,6 @@ import passport from 'passport'
 import passportBasic from './passport/passport-basic'
 import passportJwt from './passport/passport-jwt'
 import cors from 'cors'
-import fileUpload from 'express-fileupload'
 import fireConfig from './utils/fireConfig'
 
 // Routes
@@ -62,7 +61,6 @@ class App {
       this.app.use(morgan('dev'))
       this.app.use(express.urlencoded({ extended: false }))
       this.app.use(express.json())
-      this.app.use(fileUpload())
       this.app.use(session({
         secret: process.env.SECRET_SESSION,
         resave: false,

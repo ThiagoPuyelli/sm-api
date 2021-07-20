@@ -11,7 +11,7 @@ export default async (req, res, next) => {
       const fileName = randomstring.generate(10) + '.' + fileExt
       const uploadPath = path.join(__dirname, '/../uploads/' + fileName)
 
-      await image.mv(uploadPath, (err) => {
+      image.mv(uploadPath, (err) => {
         if (err) {
           return sendResponse(res, 500, 'Image invalid')
         }

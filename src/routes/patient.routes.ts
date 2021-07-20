@@ -8,7 +8,8 @@ import Patient from '../models/Patient'
 import pagination from '../utils/pagination'
 import deleteEntities from '../utils/deleteEntities'
 import firebase from 'firebase-admin'
-import saveImage from '../utils/saveImage'
+import multer from '../middlewares/multer'
+import path from 'path'
 import fs from 'fs'
 const router = Router()
 
@@ -73,8 +74,8 @@ router.get('/:id', passport.authenticate('token'), async (req, res) => {
 
 router.post('/',
   passport.authenticate('token'),
+  multer.single('image'),
   validatorReq(saveOrModifyPatient(true)),
-  saveImage,
   async (req, res) => {
     try {
       const { birth } = req.body
@@ -86,18 +87,19 @@ router.post('/',
         req.user.patients = []
       }
 
-      if (req.files && req.files.image) {
+      if (req.file) {
         const storage = firebase.storage()
-        const { uploadPath, fileName } = req.body
+        const { filename } = req.file
+        const uploadPath = path.join(__dirname, '/../uploads/' + filename)
         const imageSend = await storage.bucket().upload(uploadPath, {
-          destination: 'patients/' + fileName
+          destination: 'patients/' + filename
         })
 
         if (!imageSend) {
           return sendResponse(res, 500, 'Error to send image')
         }
-        req.body.image = 'gs://sm-app-1a1ee.appspot.com/patients/' + fileName
-        await fs.unlinkSync(uploadPath)
+        req.body.image = 'gs://sm-app-1a1ee.appspot.com/patients/' + filename
+        fs.unlinkSync(uploadPath)
       }
 
       const newPatient = await Patient.create({ ...req.body, userID: req.user._id })
