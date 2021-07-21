@@ -1,25 +1,27 @@
 import { Response } from 'express'
 import { Model } from 'mongoose'
+import deleteImgObjects from './deleteImgObjects'
 import sendResponse from './sendResponse'
 
 export default async (
   res: Response,
-  idsSting: string,
+  idsString: string,
   arrayObjects: Array<any>,
   schema: Model<any>|undefined,
-  propertyObject: string|undefined
+  propertyObject: string|undefined,
+  fire: string|undefined
 ) => {
   try {
     let verify: number = 0
-    const ids = idsSting.split('-')
-    const objectsToDelete = {}
+    const ids = idsString.split('-')
+    const objectsToDelete = []
     const objects = arrayObjects.filter((object) => {
       const verifyID = ids.find(i => String(i) === String(object[propertyObject] || object))
       if (!verifyID) {
         return object
       } else {
         verify += 1
-        if (schema) objectsToDelete[verifyID] = verifyID
+        if (schema) objectsToDelete.push(object)
         return false
       }
     })
@@ -31,7 +33,17 @@ export default async (
     if (schema) {
       const listIds = []
       for (const i in objectsToDelete) {
-        listIds.push({ deleteOne: { filter: { _id: objectsToDelete[i] } } })
+        let { _id } = objectsToDelete[i]
+        if (!_id) {
+          _id = objectsToDelete[i]
+        }
+        listIds.push({ deleteOne: { filter: { _id } } })
+      }
+      if (fire) {
+        const deleteImg = await deleteImgObjects(objectsToDelete)
+        if (!deleteImg) {
+          return sendResponse(res, 500, 'Error to delete images')
+        }
       }
       const deleteDB = await schema.bulkWrite(listIds)
       if (!deleteDB) {

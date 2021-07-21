@@ -11,7 +11,7 @@ import firebase from 'firebase-admin'
 import multer from '../middlewares/multer'
 import path from 'path'
 import fs from 'fs'
-import deleteImgPatients from '../utils/deleteImgPatients'
+import deleteImgObjects from '../utils/deleteImgObjects'
 const router = Router()
 
 router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, res) => {
@@ -168,7 +168,7 @@ router.delete('/:id', passport.authenticate('token'), async (req, res) => {
       if (!allPatients) {
         return sendResponse(res, 500, 'Error to find patients')
       }
-      const deleteImage = await deleteImgPatients(allPatients.patients)
+      const deleteImage = await deleteImgObjects(allPatients.patients)
       if (!deleteImage) {
         return sendResponse(res, 500, 'Error to delete images to patients')
       }
@@ -194,7 +194,12 @@ router.delete('/:id', passport.authenticate('token'), async (req, res) => {
       return sendResponse(res, 200, { patients })
     }
 
-    const data = await deleteEntities(res, id, req.user.patients, Patient, undefined)
+    const patients: any = await Patient.populate(req.user, { path: 'patients' })
+    if (!patients) {
+      return sendResponse(res, 500, 'Your patients doesn\'t exist')
+    }
+
+    const data = await deleteEntities(res, id, patients.patients, Patient, '_id', 'patients')
 
     if (data) {
       const { objects, verify, ids } = data
