@@ -1,3 +1,4 @@
+import { Document } from 'mongoose'
 export interface DocumentInterface {
   name: string;
   link: string;
@@ -9,7 +10,7 @@ export interface FisicExploration {
   data: string;
 }
 
-export default interface PatientInterface {
+export default interface PatientInterface extends Document {
   name: string;
   DNI: string;
   lastname: string;
@@ -23,6 +24,7 @@ export default interface PatientInterface {
   postalCode?: string;
   street?: string;
   province?: string;
+  image?: string;
   documents: DocumentInterface[];
   fisicExploration: FisicExploration[];
 }

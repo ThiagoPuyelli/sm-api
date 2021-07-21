@@ -11,6 +11,7 @@ import firebase from 'firebase-admin'
 import multer from '../middlewares/multer'
 import path from 'path'
 import fs from 'fs'
+import deleteImgPatients from '../utils/deleteImgPatients'
 const router = Router()
 
 router.get('/find/:amount/:page?', passport.authenticate('token'), async (req, res) => {
@@ -145,7 +146,6 @@ router.put('/:id',
       if (!patient) {
         return sendResponse(res, 404, 'Your patient is invalid')
       }
-      console.log(patient, { ...req.body })
 
       const newPatient = await Patient.findByIdAndUpdate(patient._id, { ...req.body }, { new: true })
 
@@ -164,7 +164,20 @@ router.delete('/:id', passport.authenticate('token'), async (req, res) => {
   try {
     const { id } = req.params
     if (id === 'all') {
-      const deletePatients = await Patient.remove()
+      const allPatients: any = await Patient.populate(req.user, { path: 'patients' })
+      if (!allPatients) {
+        return sendResponse(res, 500, 'Error to find patients')
+      }
+      const deleteImage = await deleteImgPatients(allPatients.patients)
+      if (!deleteImage) {
+        return sendResponse(res, 500, 'Error to delete images to patients')
+      }
+
+      const patientsToDelete = req.user.patients.map(patient => {
+        return { deleteOne: { filter: { _id: patient._id } } }
+      })
+
+      const deletePatients = await Patient.bulkWrite(patientsToDelete)
 
       if (!deletePatients) {
         return sendResponse(res, 500, 'Error to delete patients')

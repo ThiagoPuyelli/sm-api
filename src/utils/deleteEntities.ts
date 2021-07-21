@@ -19,7 +19,6 @@ export default async (
         return object
       } else {
         verify += 1
-        console.log(verifyID)
         if (schema) objectsToDelete[verifyID] = verifyID
         return false
       }
@@ -30,11 +29,13 @@ export default async (
     }
 
     if (schema) {
+      const listIds = []
       for (const i in objectsToDelete) {
-        const objectDelete = await schema.findByIdAndRemove(objectsToDelete[i])
-        if (!objectDelete) {
-          return sendResponse(res, 500, 'Error to delete patients')
-        }
+        listIds.push({ deleteOne: { filter: { _id: objectsToDelete[i] } } })
+      }
+      const deleteDB = await schema.bulkWrite(listIds)
+      if (!deleteDB) {
+        return sendResponse(res, 500, 'Error to delete entities')
       }
     }
 
