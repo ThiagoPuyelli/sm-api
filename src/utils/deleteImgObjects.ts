@@ -5,11 +5,14 @@ export default async (objects) => {
   try {
     const listImageDelete = []
     await objects.forEach(async (object, i) => {
-      if (object.image) {
-        const linksParts = object.image.split('/')
-        const url = linksParts[3] + '/' + linksParts[4]
-        const storageRef = await admin.storage().bucket().file(url).delete()
-        listImageDelete.push(storageRef)
+      try {
+        if (object.image) {
+          const url = object.image
+          const storageRef = await admin.storage().bucket().file(url).delete()
+          listImageDelete.push(storageRef)
+        }
+      } catch (err) {
+        return undefined
       }
     })
     return listImageDelete

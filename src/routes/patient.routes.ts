@@ -61,10 +61,16 @@ router.get('/:id', passport.authenticate('token'), async (req, res) => {
       return sendResponse(res, 500, 'Your patient, doesn\'t exist')
     }
 
-    const patient = await Patient.populate({ patientID }, { path: 'patientID' })
+    let patient: any = await Patient.populate({ patientID }, { path: 'patientID' })
 
     if (!patient) {
       return sendResponse(res, 500, 'Error to find patient')
+    }
+    patient = patient.patientID
+
+    if (patient.image) {
+      const metadata = await firebase.storage().bucket().file(patient.image).getMetadata()
+      patient.image = metadata[0].mediaLink
     }
 
     return sendResponse(res, 200, { patient })
@@ -99,7 +105,7 @@ router.post('/',
         if (!imageSend) {
           return sendResponse(res, 500, 'Error to send image')
         }
-        req.body.image = 'gs://sm-app-1a1ee.appspot.com/patients/' + filename
+        req.body.image = 'patients/' + filename
         fs.unlinkSync(uploadPath)
       }
 
