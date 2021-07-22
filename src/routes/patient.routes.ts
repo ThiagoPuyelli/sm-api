@@ -132,11 +132,9 @@ router.post('/',
 router.put('/:id',
   passport.authenticate('token'),
   validatorReq(saveOrModifyPatient(false)),
+  multer.single('image'),
   async (req, res) => {
     try {
-      if (Object.keys(req.body).length === 0) {
-        return sendResponse(res, 404, 'Information invalid')
-      }
       const { birth } = req.body
       if (birth) {
         req.body.birth = new Date(birth)
@@ -151,6 +149,20 @@ router.put('/:id',
 
       if (!patient) {
         return sendResponse(res, 404, 'Your patient is invalid')
+      }
+
+      if (req.file) {
+        const storage = await firebase.storage().bucket()
+        if (patient.image) {
+          const deleteImage = await storage.file(patient.image).delete()
+          if (!deleteImage) {
+            return sendResponse(res, 500, 'Error to delete post image')
+          }
+        }
+        const { filename } = req.file
+        const uploadPath = path.join(__dirname, '/../uploads/' + filename)
+        await storage.upload(uploadPath, { destination: 'patients/' + filename })
+        req.body.image = 'patients/' + filename
       }
 
       const newPatient = await Patient.findByIdAndUpdate(patient._id, { ...req.body }, { new: true })
