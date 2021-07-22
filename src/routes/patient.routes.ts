@@ -163,6 +163,7 @@ router.put('/:id',
         const uploadPath = path.join(__dirname, '/../uploads/' + filename)
         await storage.upload(uploadPath, { destination: 'patients/' + filename })
         req.body.image = 'patients/' + filename
+        fs.unlinkSync(uploadPath)
       }
 
       const newPatient = await Patient.findByIdAndUpdate(patient._id, { ...req.body }, { new: true })
