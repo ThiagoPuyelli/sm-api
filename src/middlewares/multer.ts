@@ -27,15 +27,21 @@ const generatedStorage = () => {
 
 const storage = generatedStorage()
 
-export default multer({
-  storage,
-  fileFilter (req, file, next) {
-    const image = file.mimetype.startsWith('image/')
+export default (filter: boolean) => {
+  return multer({
+    storage,
+    fileFilter (req, file, next) {
+      if (filter) {
+        const image = file.mimetype.startsWith('image/')
 
-    if (image) {
-      next(null, true)
-    } else {
-      next(null, false)
+        if (image) {
+          next(null, true)
+        } else {
+          next(null, false)
+        }
+      } else {
+        next(null, true)
+      }
     }
-  }
-})
+  })
+}

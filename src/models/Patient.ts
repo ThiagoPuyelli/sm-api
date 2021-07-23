@@ -81,6 +81,10 @@ const patientSchema = new Schema<PatientInterface & Document>({
         type: String,
         required: true
       },
+      download: {
+        type: String,
+        required: true
+      },
       type: {
         type: String,
         required: true,

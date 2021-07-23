@@ -6,6 +6,10 @@ import { saveAndModifyDocument } from '../validators/documents'
 import findPatient from '../middlewares/findPatient'
 import pagination from '../utils/pagination'
 import deleteEntities from '../utils/deleteEntities'
+import multer from '../middlewares/multer'
+import firebase from 'firebase-admin'
+import path from 'path'
+import fs from 'fs'
 const router = Router()
 
 router.get('/find/:id/:amount/:page?',
@@ -135,6 +139,7 @@ router.get('/get/types/:id',
 
 router.post('/:id',
   passport.authenticate('token'),
+  multer(false).single('file'),
   validatorReq(saveAndModifyDocument(true)),
   findPatient('id'),
   async (req, res) => {
@@ -144,6 +149,22 @@ router.post('/:id',
 
       if (!documents) {
         documents = []
+      }
+
+      if (req.file) {
+        const storage = firebase.storage()
+        const { filename } = req.file
+        const uploadPath = path.join(__dirname, '/../uploads/' + filename)
+        const documentSend = await storage.bucket().upload(uploadPath, {
+          destination: 'documents/' + filename
+        })
+
+        if (!documentSend) {
+          return sendResponse(res, 500, 'Error to send image')
+        }
+        req.body.link = 'documents/' + filename
+        req.body.download = documentSend[0].metadata.mediaLink
+        fs.unlinkSync(uploadPath)
       }
 
       documents.push({ ...req.body })
@@ -164,6 +185,7 @@ router.post('/:id',
 router.put('/:patientID/:documentID',
   passport.authenticate('token'),
   findPatient('patientID'),
+  multer(false).single('file'),
   validatorReq(saveAndModifyDocument(false)),
   async (req, res) => {
     try {
@@ -178,6 +200,27 @@ router.put('/:patientID/:documentID',
 
       if (!document) {
         return sendResponse(res, 500, 'The document doesn\'t exist')
+      }
+
+      if (req.file) {
+        const storage = await firebase.storage().bucket()
+        const fileDeleted = await storage.file(document.link).delete()
+        if (!fileDeleted) {
+          return sendResponse(res, 500, 'Error to delete file to document')
+        }
+
+        const { filename } = req.file
+        const uploadPath = path.join(__dirname, '/../uploads/' + filename)
+        const documentSend = await storage.upload(uploadPath, {
+          destination: 'documents/' + filename
+        })
+
+        if (!documentSend) {
+          return sendResponse(res, 500, 'Error to save new document')
+        }
+
+        req.body.link = 'documents/' + filename
+        req.body.download = documentSend[0].metadata.mediaLink
       }
 
       for (const i in req.body) {

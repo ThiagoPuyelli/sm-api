@@ -9,7 +9,7 @@ export default async (
   arrayObjects: Array<any>,
   schema: Model<any>|undefined,
   propertyObject: string|undefined,
-  fire: string|undefined
+  fire?: string|undefined
 ) => {
   try {
     let verify: number = 0

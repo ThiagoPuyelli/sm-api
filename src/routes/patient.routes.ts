@@ -81,7 +81,7 @@ router.get('/:id', passport.authenticate('token'), async (req, res) => {
 
 router.post('/',
   passport.authenticate('token'),
-  multer.single('image'),
+  multer(true).single('image'),
   validatorReq(saveOrModifyPatient(true)),
   async (req, res) => {
     try {
@@ -132,7 +132,7 @@ router.post('/',
 router.put('/:id',
   passport.authenticate('token'),
   validatorReq(saveOrModifyPatient(false)),
-  multer.single('image'),
+  multer(true).single('image'),
   async (req, res) => {
     try {
       const { birth } = req.body
