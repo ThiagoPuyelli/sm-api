@@ -10,6 +10,7 @@ import multer from '../middlewares/multer'
 import firebase from 'firebase-admin'
 import path from 'path'
 import fs from 'fs'
+import deleteImgObjects from '../utils/deleteImgObjects'
 const router = Router()
 
 router.get('/find/:id/:amount/:page?',
@@ -221,6 +222,7 @@ router.put('/:patientID/:documentID',
 
         req.body.link = 'documents/' + filename
         req.body.download = documentSend[0].metadata.mediaLink
+        await fs.unlinkSync(uploadPath)
       }
 
       for (const i in req.body) {
@@ -245,7 +247,7 @@ router.delete('/:patientID/:documentID',
   async (req, res) => {
     try {
       const patient = req.patient
-      let { documents } = patient
+      const { documents } = patient
 
       if (!documents || documents.length === 0) {
         return sendResponse(res, 500, 'Your patient don\'t have documents')
@@ -254,7 +256,11 @@ router.delete('/:patientID/:documentID',
       const { documentID } = req.params
 
       if (documentID === 'all') {
-        documents = []
+        const deleteImage = await deleteImgObjects(documents, 'link')
+        if (!deleteImage) {
+          return sendResponse(res, 500, 'Error to eliminate file')
+        }
+        patient.documents = []
 
         const newPatient = await patient.save()
 
@@ -265,7 +271,7 @@ router.delete('/:patientID/:documentID',
         return sendResponse(res, 200, { documents })
       }
 
-      const data = await deleteEntities(res, documentID, documents, undefined, '_id')
+      const data = await deleteEntities(res, documentID, documents, undefined, '_id', 'firetrue', 'link')
 
       if (data) {
         const { objects, verify, ids } = data

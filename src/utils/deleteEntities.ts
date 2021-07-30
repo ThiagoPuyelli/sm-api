@@ -9,7 +9,8 @@ export default async (
   arrayObjects: Array<any>,
   schema: Model<any>|undefined,
   propertyObject: string|undefined,
-  fire?: string|undefined
+  fire?: string|undefined,
+  property?: string
 ) => {
   try {
     let verify: number = 0
@@ -21,7 +22,7 @@ export default async (
         return object
       } else {
         verify += 1
-        if (schema) objectsToDelete.push(object)
+        if (schema || fire) objectsToDelete.push(object)
         return false
       }
     })
@@ -39,15 +40,16 @@ export default async (
         }
         listIds.push({ deleteOne: { filter: { _id } } })
       }
-      if (fire) {
-        const deleteImg = await deleteImgObjects(objectsToDelete)
-        if (!deleteImg) {
-          return sendResponse(res, 500, 'Error to delete images')
-        }
-      }
       const deleteDB = await schema.bulkWrite(listIds)
       if (!deleteDB) {
         return sendResponse(res, 500, 'Error to delete entities')
+      }
+    }
+
+    if (fire) {
+      const deleteImg = await deleteImgObjects(objectsToDelete, property)
+      if (!deleteImg) {
+        return sendResponse(res, 500, 'Error to delete images')
       }
     }
 
