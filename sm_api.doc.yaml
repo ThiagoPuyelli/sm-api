@@ -1,0 +1,537 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: http://localhost:3500/
+info:
+  description: This is a api for system medic app
+  version: "1.0.0"
+  title: SM_API
+  contact:
+    email: thiagopuyelli@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+paths:
+  /auth/sign-in:
+    post: 
+      tags:
+        - users
+      summary: Login user
+      description: This is a route for receive token and authenticate user
+      parameters:
+        - in: Basic Auth
+          name: Email
+          description: In the username is required the email
+          required: true
+          schema:
+            type: string
+        - in: Basic Auth
+          name: Password
+          description: Password of the user
+          required: true
+          schema: 
+            type: string
+      responses:
+        '500':
+          description: Unauthorized
+        '200':
+          description: User authorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: 
+                    type: number
+                  message:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+  /patient/find/:amount/:pageOptional:
+    get:
+      tags:
+        - patients
+      summary: Get Patients
+      description: In the parameters, indicate in the amount, how many patients do you need and in the page (optional), indicate de page of list, but if not indicated, the first page will be returned
+      responses:
+        '401':
+          description: Unauthorized
+        '404':
+          description: If the user don't have a patients
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: You get patients
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: object
+                    properties:
+                      patients:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Patient'
+                      numberPages:
+                        type: number
+  /patient/:patientID:
+    get:
+      tags:
+        - patients
+      summary: Get Patient
+      description: This is a route for get one Patient
+      responses:
+        '401':
+          description: Unauthorized
+        '404':
+          description: If you don't have patients
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '500':
+          description: If have a error to find patient because server error or the patient don't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: 
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Patient
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: object
+                    properties:
+                      patient:
+                        $ref: '#/components/schemas/Patient'
+  /patient:
+    post:
+      tags:
+        - patients
+      summary: Save Patient
+      description: This is a route to user add a patient
+      parameters:
+        - in: body
+          name: Data Patient
+          description: The _id is not send and is required the name, lastname and DNI, the other information is optional.
+          required: true
+          schema:
+            $ref: '#/components/schemas/Patient'
+      responses:
+        '500':
+          description: When data is invalid or have error to save patient
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '200':
+          description: When patient is saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+  /patient/:patientId:
+    put:
+      tags:
+        - patients
+      summary: Update Patient
+      description: This is a route to update patient
+      parameters:
+        - in: body
+          name: Data Patient
+          description: The _id is not send in the body, and all the data is optional.
+          required: false
+          schema:
+            $ref: '#/components/schemas/Patient'
+      responses:
+        '404':
+          description: If you don't send body with data, or data is invalid, or patient doesn't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '500':
+          description: If have error to update patient
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Update Patient
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+  /patient/:patient_id:
+    delete:
+      tags:
+        - patients
+      summary: Delete Patient
+      description: This is a route for delete Patient
+      responses:
+        '401':
+          description: Unauthorized
+        '500':
+          description: Error to delete patient
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Patient deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+  /turn/find/:amount/:pageOptional:
+    get:
+      tags:
+        - schedule
+      summary: Get Turns
+      description: This is a route for get Turns in schedule
+      responses:
+        '401':
+          description: Unauthorized
+        '404':
+          description: If you don't have turns
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '500':
+          description: If the server have error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Get Turns
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: object
+                    properties:
+                      schedule:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Turn'
+                      numberPages:
+                        type: number
+  /turn/:turnID:
+    get:
+      tags:
+        - schedule
+      summary: Get Turn
+      description: This is a route to get a one Turn with id
+      responses:
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error, or your turn doesn't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Get Turn
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: object
+                    properties:
+                      turn:
+                        $ref: '#/components/schemas/Turn'
+    put:
+      tags:
+        - schedule
+      summary: Update Turn
+      description: This is a route for update turn
+      parameters:
+        - in: body
+          name: Data Turn
+          description: The _id is not send and the other data is optional
+          required: true
+          schema:
+            $ref: '#/components/schemas/Turn'
+      responses:
+        '401':
+          description: Unauthorized
+        '404':
+          description: If the information is invalid or turn doesn't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Turn updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+    delete:
+      tags:
+        - schedule
+      summary: Delete Turn
+      description: This is a route to delete Turn with id
+      responses:
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error, or your turn doesn't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '200':
+          description: Delete Turn
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: object
+                    properties:
+                      turn:
+                        $ref: '#/components/schemas/Turn'
+  /turn:
+    post:
+      tags:
+        - schedule
+      summary: Save Turn
+      description: This is a route to user add a turn in schedule
+      parameters:
+        - in: body
+          name: Data Turn
+          description: The _id is not send and the description is optional
+          required: true
+          schema:
+            $ref: '#/components/schemas/Turn'
+      responses:
+        '500':
+          description: When data is invalid or have error to save turn
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '404':
+          description: If the patient doesn't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '200':
+          description: When turn is saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                  message:
+                    type: string
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - _id
+        - email
+        - password
+      properties:
+        _id:
+          type: string
+          format: mongo
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        patients:
+          type: array
+          items:
+            type: string
+            format: mongo
+        schedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/Turn'
+    Patient:
+      type: object
+      required:
+        - _id
+        - name
+        - lastname
+        - DNI
+        - userID
+      properties:
+        _id:
+          type: string
+          format: mongo
+        name:
+          type: string
+        lastname:
+          type: string
+        DNI:
+          type: string
+          format: DNI
+        email:
+          type: string
+          format: email
+        birth:
+          type: string
+          format: date
+        gender:
+          type: string
+        phone:
+          type: string
+        mobile:
+          type: string
+        address:
+          type: string
+        postalCode:
+          type: string
+        street:
+          type: string
+        province: 
+          type: string
+    Turn:
+      type: object
+      required:
+        - _id
+        - patient
+        - date
+      properties:
+        _id:
+          type: string
+          format: mongo
+        patient:
+          type: string
+          format: mongo
+        date:
+          type: string
+          format: date
+        description:
+          type: string
