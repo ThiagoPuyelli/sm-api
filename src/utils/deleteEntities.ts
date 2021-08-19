@@ -9,7 +9,7 @@ export default async (
   arrayObjects: Array<any>,
   schema: Model<any>|undefined,
   propertyObject: string|undefined,
-  fire: string|undefined
+  fire?: string|undefined
 ) => {
   try {
     let verify: number = 0
@@ -40,7 +40,7 @@ export default async (
         listIds.push({ deleteOne: { filter: { _id } } })
       }
       if (fire) {
-        const deleteImg = await deleteImgObjects(objectsToDelete)
+        const deleteImg = await deleteImgObjects(objectsToDelete, fire)
         if (!deleteImg) {
           return sendResponse(res, 500, 'Error to delete images')
         }

@@ -81,7 +81,7 @@ router.get('/:id', passport.authenticate('token'), async (req, res) => {
 
 router.post('/',
   passport.authenticate('token'),
-  multer.single('image'),
+  multer(true).single('image'),
   validatorReq(saveOrModifyPatient(true)),
   async (req, res) => {
     try {
@@ -132,7 +132,7 @@ router.post('/',
 router.put('/:id',
   passport.authenticate('token'),
   validatorReq(saveOrModifyPatient(false)),
-  multer.single('image'),
+  multer(true).single('image'),
   async (req, res) => {
     try {
       const { birth } = req.body
@@ -187,7 +187,7 @@ router.delete('/:id', passport.authenticate('token'), async (req, res) => {
       if (!allPatients) {
         return sendResponse(res, 500, 'Error to find patients')
       }
-      const deleteImage = await deleteImgObjects(allPatients.patients)
+      const deleteImage = await deleteImgObjects(allPatients.patients, 'image')
       if (!deleteImage) {
         return sendResponse(res, 500, 'Error to delete images to patients')
       }
@@ -218,7 +218,7 @@ router.delete('/:id', passport.authenticate('token'), async (req, res) => {
       return sendResponse(res, 500, 'Your patients doesn\'t exist')
     }
 
-    const data = await deleteEntities(res, id, patients.patients, Patient, '_id', 'patients')
+    const data = await deleteEntities(res, id, patients.patients, Patient, '_id', 'image')
 
     if (data) {
       const { objects, verify, ids } = data

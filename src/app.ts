@@ -15,6 +15,7 @@ import patientRoutes from './routes/patient.routes'
 import turnRoutes from './routes/turn.routes'
 import documentRoutes from './routes/document.routes'
 import fisicExplorationRoutes from './routes/fisicExploration.routes'
+import operationRoutes from './routes/operation.routes'
 
 class App {
     public app: express.Application
@@ -76,6 +77,7 @@ class App {
       this.app.use('/turn/', turnRoutes)
       this.app.use('/document/', documentRoutes)
       this.app.use('/fisic/', fisicExplorationRoutes)
+      this.app.use('/operation/', operationRoutes)
     }
 }
 

@@ -81,6 +81,10 @@ const patientSchema = new Schema<PatientInterface & Document>({
         type: String,
         required: true
       },
+      download: {
+        type: String,
+        required: true
+      },
       type: {
         type: String,
         required: true,
@@ -101,6 +105,26 @@ const patientSchema = new Schema<PatientInterface & Document>({
         maxLength: 400
       },
       _id: false
+    }],
+    default: []
+  },
+  operations: {
+    type: [{
+      title: {
+        type: String,
+        required: true,
+        maxLength: 40
+      },
+      time: {
+        type: String,
+        required: true,
+        maxLength: 15,
+        minLength: 5
+      },
+      date: {
+        type: Date,
+        required: true
+      }
     }],
     default: []
   }
